@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import CrisprVideoPlayer from "./CrisprVideoPlayer";
+import { fetchCourseData, fetchComments, postComment, likeComment, dislikeComment, deleteComment } from "../../api/mockApi";
 
 const IconLike = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 8.39C7.21 8.81 7 9.38 7 10v9c0 1.66 1.34 3 3 3h9c1.23 0 2.24-.74 2.67-1.83l1.83-4.28c.04-.15.06-.31.06-.47v-4z"/></svg>;
 const IconDislike = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15 3H6c-1.23 0-2.24.74-2.67 1.83l-1.83 4.28c-.04.15-.06.31-.06.47v4c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L11.83 23l6.59-7.39c.38-.42.58-.99.58-1.61V5c0-1.66-1.34-3-3-3zm4 0v12h4V3h-4z"/></svg>;
@@ -8,38 +9,41 @@ const IconReport = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="c
 const IconDelete = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>;
 const LogoIcon = () => <svg width="28" height="28" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 0C8.954 0 0 8.954 0 20C0 31.046 8.954 40 20 40C31.046 40 40 31.046 40 20C40 8.954 31.046 0 20 0ZM20 36C11.163 36 4 28.837 4 20C4 11.163 11.163 4 20 4C28.837 4 36 11.163 36 20C36 28.837 28.837 36 20 36ZM16 11H24V24C24 26.209 22.209 28 20 28C17.791 28 16 26.209 16 24V11Z" fill="currentColor"/></svg>;
 
-const DUMMY_MODULES = [
-  {
-    id: "m1", title: "Introduction to CRISPR",
-    lectures: [
-      { id: "l1", title: "1. What is CRISPR?", duration: "10:24", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-      { id: "l2", title: "2. History of Gene Editing", duration: "15:10", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-    ]
-  },
-  {
-    id: "m2", title: "Advanced Gene Editing",
-    lectures: [
-      { id: "l3", title: "3. The Cas9 Protein Explained", duration: "12:45", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-      { id: "l4", title: "4. Off-target Effects", duration: "18:30", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-      { id: "l5", title: "5. Future of Medical Genetics", duration: "22:15", videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4" },
-    ]
-  }
-];
-
-const DUMMY_COMMENTS = [
-  { id: 1, author: "ariari", time: "3 months ago", date: "2023-08-01T10:00:00Z", text: "fuk yea I can't wait for this", likes: 57, dislikes: 1, replies: [] },
-  { id: 2, author: "onepieceispeak", time: "3 months ago", date: "2023-08-15T12:00:00Z", text: "i read this in a power voice because of your profile", likes: 18, dislikes: 0, replies: [] },
-  { id: 3, author: "joestarpilled", time: "4 months ago", date: "2023-07-20T10:00:00Z", text: "ohmygof yes", likes: 36, dislikes: 1, replies: [] },
-  { id: 4, author: "Chicken de third", time: "3 months ago", date: "2023-09-01T15:00:00Z", text: "SO FLIPPIN EXCITED, SEASON 1 WAS PEAK, SEASON 2 IS GOING TO KILL ME", likes: 19, dislikes: 1, replies: [] },
-];
-
 const WatchPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [currentLectureId, setCurrentLectureId] = useState("l1");
-  const [comments, setComments] = useState(DUMMY_COMMENTS);
+  const [courseData, setCourseData] = useState({ modules: [], title: "" });
+  const [currentLectureId, setCurrentLectureId] = useState(null);
+  const [comments, setComments] = useState([]);
   const [commentFilter, setCommentFilter] = useState('best');
   const [newComment, setNewComment] = useState("");
   const [isTheaterMode, setIsTheaterMode] = useState(false);
+  const [isLoadingCourse, setIsLoadingCourse] = useState(true);
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [isPostingComment, setIsPostingComment] = useState(false);
+
+  useEffect(() => {
+    const loadCourse = async () => {
+      setIsLoadingCourse(true);
+      const data = await fetchCourseData();
+      setCourseData(data);
+      if (data.modules.length > 0 && data.modules[0].lectures.length > 0) {
+        setCurrentLectureId(data.modules[0].lectures[0].id);
+      }
+      setIsLoadingCourse(false);
+    };
+    loadCourse();
+  }, []);
+
+  useEffect(() => {
+    const loadComments = async () => {
+      if (!currentLectureId) return;
+      setIsLoadingComments(true);
+      const fetchedComments = await fetchComments(currentLectureId);
+      setComments(fetchedComments);
+      setIsLoadingComments(false);
+    };
+    loadComments();
+  }, [currentLectureId]);
 
   const filteredComments = [...comments].sort((a, b) => {
     if (commentFilter === 'newest') return new Date(b.date) - new Date(a.date);
@@ -51,10 +55,10 @@ const WatchPage = () => {
     alert("Share functionality triggered!");
   };
 
-  const flatLectures = DUMMY_MODULES.flatMap(m => m.lectures);
+  const flatLectures = courseData.modules.flatMap(m => m.lectures);
   const currentLectureIndex = flatLectures.findIndex(l => l.id === currentLectureId);
   const currentLecture = flatLectures[currentLectureIndex];
-  const courseTitle = "Genetic Engineering 101";
+  const courseTitle = courseData.title;
 
   const handleNext = () => {
     if (currentLectureIndex < flatLectures.length - 1) setCurrentLectureId(flatLectures[currentLectureIndex + 1].id);
@@ -64,30 +68,44 @@ const WatchPage = () => {
     if (currentLectureIndex > 0) setCurrentLectureId(flatLectures[currentLectureIndex - 1].id);
   };
 
-  const handlePostComment = () => {
-    if (newComment.trim()) {
-      const newEntry = {
-        id: Date.now(),
+  const handlePostComment = async () => {
+    if (newComment.trim() && !isPostingComment) {
+      setIsPostingComment(true);
+      const newEntryData = {
         author: "You (Student)",
         time: "Just now",
-        date: new Date().toISOString(),
         text: newComment.trim(),
-        likes: 0, dislikes: 0, replies: [], isOwner: true
       };
-      setComments([newEntry, ...comments]);
+      
+      const createdComment = await postComment(currentLectureId, newEntryData);
+      setComments([createdComment, ...comments]);
       setNewComment("");
+      setIsPostingComment(false);
     }
   };
 
-  const handleLike = (id) => {
+  const handleLike = async (id) => {
     setComments(comments.map(c => c.id === id ? { ...c, likes: c.userLiked ? c.likes - 1 : c.likes + 1, userLiked: !c.userLiked, userDisliked: false, dislikes: c.userDisliked ? c.dislikes - 1 : c.dislikes } : c));
+    await likeComment(currentLectureId, id);
   };
 
-  const handleDislike = (id) => {
+  const handleDislike = async (id) => {
     setComments(comments.map(c => c.id === id ? { ...c, dislikes: c.userDisliked ? c.dislikes - 1 : c.dislikes + 1, userDisliked: !c.userDisliked, userLiked: false, likes: c.userLiked ? c.likes - 1 : c.likes } : c));
+    await dislikeComment(currentLectureId, id);
   };
 
-  const handleDeleteComment = (id) => setComments(comments.filter(c => c.id !== id));
+  const handleDeleteComment = async (id) => {
+    setComments(comments.filter(c => c.id !== id));
+    await deleteComment(currentLectureId, id);
+  };
+
+  if (isLoadingCourse) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] text-white flex items-center justify-center font-sans">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-400"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white font-sans flex flex-col">
@@ -213,7 +231,7 @@ const WatchPage = () => {
             )}
           </div>
           <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
-            {DUMMY_MODULES.map(module => (
+            {courseData.modules.map(module => (
               <div key={module.id} className="mb-5">
                 <div className="px-6 py-3 text-xs font-bold text-white/40 uppercase tracking-[1.5px]">{module.title}</div>
                 {module.lectures.map(lecture => {

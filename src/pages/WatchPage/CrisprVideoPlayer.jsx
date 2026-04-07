@@ -132,6 +132,15 @@ const CrisprVideoPlayer = ({ src, videoKey, title = "The Strongest Job is Appare
     }
   };
 
+  const togglePiP = async () => {
+    if (!videoRef.current) return;
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture().catch(console.error);
+    } else if (document.pictureInPictureEnabled) {
+      await videoRef.current.requestPictureInPicture().catch(console.error);
+    }
+  };
+
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
@@ -194,14 +203,14 @@ const CrisprVideoPlayer = ({ src, videoKey, title = "The Strongest Job is Appare
         </div>
 
         <div 
-          className={`relative w-full bg-black flex justify-center items-center group ${isTheaterMode ? 'flex-1 max-h-full' : 'aspect-video'}`}
+          className={`relative w-full bg-black flex justify-center items-center group ${isTheaterMode ? 'flex-1 min-h-0' : 'aspect-video'}`}
           onMouseEnter={() => setIsHovering(true)}
           onMouseLeave={() => setIsHovering(false)}
         >
           <video
             key={videoKey}
             ref={videoRef}
-            className={`w-full h-full object-contain cursor-pointer ${isTheaterMode ? 'max-h-full' : ''}`}
+            className={`w-full h-full object-contain cursor-pointer`}
             src={src}
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={handleLoadedMetadata}
@@ -240,7 +249,7 @@ const CrisprVideoPlayer = ({ src, videoKey, title = "The Strongest Job is Appare
                 </div>
                 <div className="flex items-center gap-4">
                   <button className="text-white hover:text-yellow-400 transition-colors p-0 flex items-center justify-center" onClick={handleDownload} title="Download"><IconDownload /></button>
-                  <button className="text-white hover:text-yellow-400 transition-colors p-0 flex items-center justify-center" title="Picture in Picture"><IconPiP /></button>
+                  <button className="text-white hover:text-yellow-400 transition-colors p-0 flex items-center justify-center" onClick={togglePiP} title="Picture in Picture"><IconPiP /></button>
                   <button className="text-white hover:text-yellow-400 transition-colors p-0 flex items-center justify-center" title="Captions"><IconCC /></button>
                   <button className={`p-0 flex items-center justify-center transition-colors ${isTheaterMode ? 'text-yellow-400' : 'text-white hover:text-yellow-400'}`} onClick={() => onTheaterToggle && onTheaterToggle()} title="Theater Mode"><IconTheater /></button>
                   <button className="text-white hover:text-yellow-400 transition-colors p-0 flex items-center justify-center" onClick={toggleFullScreen} title="Fullscreen"><IconFullscreen /></button>
