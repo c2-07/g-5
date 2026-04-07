@@ -10,7 +10,7 @@ import filledStar from "/icons/star.png";
 import closeIcon from "/icons/close.png";
 
 const CourseRatingsCard = (props) => {
-  const { ttl = "", closeModal = () => {} } = props;
+  const { ttl = "", closeModal = () => {}, onSave } = props;
 
   const [selectedRatingNumber, setSelectedRatingNumber] = useState(0);
   const [hoverStarNum, setHoverStarNum] = useState(0);
@@ -45,7 +45,9 @@ const CourseRatingsCard = (props) => {
   };
 
   const submitHandler = () => {
-    console.log("selectedRatingNumber", ratings[selectedRatingNumber]);
+    if (onSave) {
+      onSave(selectedRatingNumber);
+    }
     closeModal();
   };
 

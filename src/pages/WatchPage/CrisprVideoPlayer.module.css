@@ -1,0 +1,319 @@
+.playerContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #121212;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.topBar {
+  background-color: #1a1a1a;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.topBarLeft {
+  display: flex;
+  align-items: center;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+}
+
+.progressBox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.progressBox:hover {
+  background: rgba(255,255,255,0.1);
+}
+
+.progressIcon {
+  color: #00ff84;
+  display: flex;
+}
+
+.progressText {
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.progressArrow {
+  display: flex;
+  color: #aaa;
+}
+
+.breadcrumbHome {
+  color: #fff;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.breadcrumbSeparator {
+  color: #666;
+  margin: 0 5px;
+}
+
+.breadcrumbCat {
+  color: #aaa;
+}
+
+.breadcrumbTitle {
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.videoWrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.videoElement {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.controlsOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.6) 40%, transparent);
+  padding: 0 20px 15px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 10;
+}
+
+.videoWrapper:hover .controlsOverlay {
+  opacity: 1;
+}
+
+.progressBarContainer {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  position: relative;
+  transition: height 0.1s;
+}
+
+.progressBarContainer:hover {
+  height: 6px;
+}
+
+.progressBar {
+  height: 100%;
+  background: #ffcc00;
+  width: 0%;
+  position: relative;
+}
+
+.progressBar::after {
+  content: '';
+  position: absolute;
+  right: -5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background: #ffcc00;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.1s;
+}
+
+.progressBarContainer:hover .progressBar::after {
+  opacity: 1;
+}
+
+.controlsRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.leftControls, .rightControls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.rightControls {
+  gap: 18px;
+}
+
+.controlBtn {
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  padding: 0;
+}
+
+.controlBtn:hover {
+  color: #ffcc00;
+}
+
+.timeDisplay {
+  color: #ccc;
+  font-size: 12px;
+  font-family: inherit;
+  margin-left: 5px;
+  letter-spacing: 0.5px;
+}
+
+/* SECONDARY TOOLBAR BELOW VIDEO */
+.secondaryToolbar {
+  background-color: #1a1a1b;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid #2a2a2b;
+}
+
+.toolGroup {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.toolGroupRight {
+  gap: 25px;
+}
+
+.stBtn {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.stBtn:hover {
+  color: #fff;
+}
+
+.stBtn.active {
+  color: #ff6633;
+}
+
+.stBtn.activeIcon {
+  color: #ffcc00;
+}
+
+.stIcon {
+  font-size: 15px;
+}
+
+.volumeSlider {
+  -webkit-appearance: none;
+  width: 80px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  transition: width 0.2s, background 0.2s;
+}
+
+.volumeSlider:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  border: none;
+}
+
+.courseProgressInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  margin-left: 8px;
+  margin-right: 8px;
+}
+.courseProgressInline svg {
+  width: 14px;
+  height: 14px;
+  color: #f1c40f;
+}
+
+.stBtnActive {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  cursor: default;
+}
+.stBtnActive:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.stBtnActive .stIcon {
+  color: #f1c40f;
+}

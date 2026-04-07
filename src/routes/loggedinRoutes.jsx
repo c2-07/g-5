@@ -36,6 +36,8 @@ import InstructorCoursePage from "../pages/InstructorPages/InstructorCoursePage/
 import CreateCourseSteps from "../pages/InstructorPages/CreateCourseSteps/CreateCourseSteps";
 import CreateCourse from "../pages/InstructorPages/CreateCourse/CreateCourse";
 
+import WatchPage from "../pages/WatchPage/WatchPage";
+
 const loggedinRoutes = [
   {
     path: "/",
@@ -201,6 +203,10 @@ const loggedinRoutes = [
   {
     path: "/instructor/create-course",
     element: <CreateCourse />,
+  },
+  {
+    path: "/watch/:id",
+    element: <WatchPage />,
   },
 ];
 
