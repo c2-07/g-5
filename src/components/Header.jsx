@@ -12,7 +12,7 @@ const UdemyLogo = () => (
   <img className="h-full w-auto object-contain" src={udemyLogo} alt="Udemy" />
 );
 
-const Avatar = ({ initials = "PK" }) => (
+const Avatar = ({ initials = "US" }) => (
   <div className="w-9 h-9 rounded-full bg-[#a435f0] flex items-center justify-center text-white font-bold text-sm select-none cursor-pointer hover:ring-2 hover:ring-[#a435f0] hover:ring-offset-1 hover:ring-offset-black transition-all duration-300">
     {initials}
   </div>
@@ -97,7 +97,7 @@ const Header = ({ onMenuClick }) => {
             <IconButton icon={Bell} label="Notifications" />
           </div>
 
-          <Avatar initials="PK" />
+          <Avatar initials="US" />
         </div>
       </div>
     </header>
