@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CrisprVideoPlayer from "./CrisprVideoPlayer";
-import { fetchCourseData, fetchComments, postComment, likeComment, dislikeComment, deleteComment } from "../../api/mockApi";
+import { fetchCourseData, fetchComments, postComment, likeComment, dislikeComment, deleteComment, postReply } from "../../api/mockApi";
 
 const IconLike = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 8.39C7.21 8.81 7 9.38 7 10v9c0 1.66 1.34 3 3 3h9c1.23 0 2.24-.74 2.67-1.83l1.83-4.28c.04-.15.06-.31.06-.47v-4z"/></svg>;
 const IconDislike = () => <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M15 3H6c-1.23 0-2.24.74-2.67 1.83l-1.83 4.28c-.04.15-.06.31-.06.47v4c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L11.83 23l6.59-7.39c.38-.42.58-.99.58-1.61V5c0-1.66-1.34-3-3-3zm4 0v12h4V3h-4z"/></svg>;
@@ -20,6 +20,9 @@ const WatchPage = () => {
   const [isLoadingCourse, setIsLoadingCourse] = useState(true);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [isPostingComment, setIsPostingComment] = useState(false);
+  const [replyingTo, setReplyingTo] = useState(null);
+  const [replyText, setReplyText] = useState("");
+  const [isPostingReply, setIsPostingReply] = useState(false);
 
   useEffect(() => {
     const loadCourse = async () => {
@@ -97,6 +100,18 @@ const WatchPage = () => {
   const handleDeleteComment = async (id) => {
     setComments(comments.filter(c => c.id !== id));
     await deleteComment(currentLectureId, id);
+  };
+
+  const handlePostReply = async (commentId) => {
+    if (!replyText.trim() || isPostingReply) return;
+    setIsPostingReply(true);
+    const replyData = { author: 'You (Student)', time: 'Just now', text: replyText.trim() };
+    await postReply(currentLectureId, commentId, replyData);
+    const updatedComments = await fetchComments(currentLectureId);
+    setComments(updatedComments);
+    setReplyText('');
+    setReplyingTo(null);
+    setIsPostingReply(false);
   };
 
   if (isLoadingCourse) {
@@ -208,13 +223,19 @@ const WatchPage = () => {
                     <div className="flex items-center gap-4 mt-2">
                        <button className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full transition-colors ${c.userLiked ? 'text-green-400' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`} onClick={() => handleLike(c.id)}><IconLike /> {c.likes > 0 ? c.likes : ''}</button>
                        <button className={`flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-full transition-colors ${c.userDisliked ? 'text-green-400' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`} onClick={() => handleDislike(c.id)}><IconDislike /> {c.dislikes > 0 ? c.dislikes : ''}</button>
-                       <button className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:bg-white/10 hover:text-white px-2 py-1 rounded-full transition-colors" onClick={() => alert("Reply functionality coming soon!")}><IconReply /> Reply</button>
+                       <button
+                         className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 hover:bg-white/10 hover:text-white px-2 py-1 rounded-full transition-colors"
+                         onClick={() => setReplyingTo(replyingTo === c.id ? null : c.id)}
+                       >
+                         <IconReply /> Reply
+                       </button>   
                        {c.isOwner && (
                          <button className="flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:bg-red-500/10 px-2 py-1 rounded-full transition-colors" onClick={() => handleDeleteComment(c.id)}>
                            <IconDelete /> Delete
                          </button>
                        )}
                     </div>
+                    {replyingTo === c.id && (<div className='flex gap-3 mt-3'><div className='w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-xs font-semibold shrink-0'>U</div><div className='flex-1 flex flex-col'><input className='bg-transparent border-b border-gray-600 text-white py-2 text-sm focus:outline-none focus:border-white transition-colors placeholder-gray-500 w-full' placeholder={'Reply to ' + c.author + '...'} value={replyText} onChange={(e) => setReplyText(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handlePostReply(c.id)} autoFocus />{replyText && (<div className='self-end mt-2 flex gap-2'><button className='text-white hover:bg-white/10 px-4 py-1.5 rounded-full font-semibold text-xs transition-colors' onClick={() => { setReplyingTo(null); setReplyText(''); }}>Cancel</button><button className='bg-blue-500 hover:bg-blue-400 text-black px-4 py-1.5 rounded-full font-semibold text-xs transition-colors' onClick={() => handlePostReply(c.id)} disabled={isPostingReply}>Reply</button></div>)}</div></div>)}{c.replies && c.replies.length > 0 && (<div className='mt-3 flex flex-col gap-4 pl-4 border-l border-white/10'>{c.replies.map(reply => (<div key={reply.id} className='flex gap-3'><div className='w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-black font-bold text-sm shrink-0'>{reply.author.charAt(0).toUpperCase()}</div><div className='flex flex-col gap-1'><div className='flex items-center gap-2'><span className='font-semibold text-white text-xs bg-black px-2 py-0.5 rounded-lg'>{reply.author}</span><span className='text-gray-400 text-xs'>{reply.time}</span></div><div className='text-gray-200 text-sm leading-relaxed'>{reply.text}</div></div></div>))}</div>)}
                   </div>
                 </div>
               ))}

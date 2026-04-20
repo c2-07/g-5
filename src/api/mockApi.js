@@ -84,3 +84,21 @@ export const deleteComment = async (lectureId, commentId) => {
   }
   return { success: true };
 };
+
+export const postReply = async (lectureId, commentId, replyData) => {
+  await delay(400);
+  const comment = DUMMY_COMMENTS[lectureId]?.find(c => c.id === commentId);
+  if (comment) {
+    const newReply = {
+      ...replyData,
+      id: Date.now(),
+      date: new Date().toISOString(),
+      likes: 0,
+      dislikes: 0,
+      isOwner: true
+    };
+    comment.replies = [newReply, ...(comment.replies || [])];
+    return newReply;
+  }
+  return null;
+};
